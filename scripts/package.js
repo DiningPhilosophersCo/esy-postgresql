@@ -147,6 +147,7 @@ download(source)
   .then((pathStr) => {
     switch (path.extname(pathStr)) {
       case ".tgz":
+      case ".bz2":
       case ".gz":
         tar(pathStr, pkgPath, true);
         break;

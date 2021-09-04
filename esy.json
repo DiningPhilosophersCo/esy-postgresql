@@ -1,26 +1,55 @@
 {
   "//": "Keys that start with // are ignored",
-  "name": "esy-hello",
-  "version": "0.0.1000",
+  "name": "esy-postgresql",
+  "version": "13.4.0",
   "// version": "See readme and docs on how to version packages",
   "description": "hello packaged for esy",
-  "source": "https://github.com/esy/test-hello-c/archive/0.1.0.zip#sha256:e1bd9924eb5d97d99c9b87f9a4a95b734e111cd6dd01464358029c751d57d693",
+  "source": "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.bz2#sha256:ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd",
   "override": {
     "buildEnv": {
-      "//": "Only for illustrative purpose. Not a real, useful package",
-      "PREFIX": "$cur__install",
-      "CC_PREFIX": "#{os == 'windows' ? 'x86_64-w64-mingw32-': '' }"
+      "CFLAGS": "-I#{esy-openssl.install / 'include'} $CFLAGS",
+      "LDFLAGS": "-L#{esy-openssl.lib} -lcrypto $LDFLAGS"
     },
-    "build": ["./configure", "make"],
+    "build": [
+      "find ./ -exec touch -t 200905010101 {} +",
+      "./configure #{os == 'windows' ? '--host x86_64-w64-mingw32': '' } --prefix=$cur__install --with-openssl --without-readline --disable-debug --enable-thread-safety",
+      "make"
+    ],
     "install": "make install",
     "buildsInSource": true,
     "exportedEnv": {
-      "//": "This is just an example",
       "PKG_CONFIG_PATH": {
         "val": "#{self.lib / 'pkgconfig'}",
         "scope": "global"
+      },
+      "LDFLAGS": {
+        "scope": "global",
+        "val": "-L#{self.lib} -lpq"
+      },
+      "CPPFLAGS": {
+        "scope": "global",
+        "val": "-I#{self.install / 'include'}"
+      },
+      "LD_LIBRARY_PATH": {
+        "scope": "global",
+        "val": "#{self.lib}:$LD_LIBRARY_PATH"
+      },
+      "LIBRARY_PATH": {
+        "scope": "global",
+        "val": "#{self.lib}:$LIBRARY_PATH"
+      },
+      "CPATH": {
+        "scope": "global",
+        "val": "#{self.install / 'include'}:$CPATH"
+      },
+      "PATH": {
+        "scope": "global",
+        "val": "#{self.bin}:$PATH"
       }
     },
-    "dependencies": {}
+    "dependencies": {
+      "esy-zlib": "esy-packages/esy-zlib",
+      "esy-openssl": "esy-packages/esy-openssl"
+    }
   }
 }
